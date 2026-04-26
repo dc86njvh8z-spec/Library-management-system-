@@ -1,0 +1,86 @@
+import datetime
+import math
+
+class LibrarySystem:
+    def __init__(self):
+        # Dictionary to manage book records
+        self.books = {
+            "B001": {"title": "Python Programming", "status": "Available", "student": None, "days": 0},
+            "B002": {"title": "Data Structures", "status": "Available", "student": None, "days": 0},
+            "B003": {"title": "Artificial Intelligence", "status": "Available", "student": None, "days": 0}
+        }
+
+    def display_books(self):
+        print("\n" + "═"*55)
+        print(f"{'ID':<8} | {'Book Title':<25} | {'Status':<12}")
+        print("─"*55)
+        for bid, info in self.books.items():
+            print(f"{bid:<8} | {info['title']:<25} | {info['status']:<12}")
+        print("═"*55)
+
+    def calculate_fine(self, days_late):
+        total_fine = 0
+        for day in range(1, days_late + 1):
+            week_num = math.ceil(day / 7)
+            # Compounding daily rate: 10 * (week_number!)
+            daily_rate = 10 * math.factorial(week_num)
+            total_fine += daily_rate
+        return total_fine
+
+    def issue_book(self):
+        bid = input("\n📘 Enter Book ID to issue: ").upper()
+        if bid in self.books and self.books[bid]["status"] == "Available":
+            name = input("👤 Enter Student Name: ")
+            days = int(input("⏳ Issued for how many days? "))
+            
+            self.books[bid].update({
+                "status": "Issued",
+                "student": name,
+                "days": days,
+                "issue_date": datetime.date.today()
+            })
+            print(f"\n✅ SUCCESS: '{self.books[bid]['title']}' issued to {name}.")
+            print(f"🔔 NOTICE: Return within {days} days. Late returns face progressive fines!")
+        else:
+            print("\n❌ ERROR: Book is either already issued or ID is invalid.")
+
+    def return_book(self):
+        bid = input("\n📙 Enter Book ID to return: ").upper()
+        if bid in self.books and self.books[bid]["status"] == "Issued":
+            # For demonstration, we manually input the elapsed days
+            elapsed = int(input(f"📅 How many days has the student kept the book? "))
+            allowed = self.books[bid]["days"]
+
+            if elapsed > allowed:
+                late_days = elapsed - allowed
+                fine = self.calculate_fine(late_days)
+                print(f"\n🚩 STATUS: OVERDUE by {late_days} day(s).")
+                print(f"💰 TOTAL FINE: Rs. {fine}")
+            else:
+                print("\n✅ STATUS: Returned on time. No fine applied.")
+
+            # Reset book status
+            self.books[bid].update({"status": "Available", "student": None, "days": 0})
+        else:
+            print("\n❌ ERROR: This book was not issued.")
+
+def main():
+    library = LibrarySystem()
+    while True:
+        print("\n--- 📚 MODERN LIBRARY MANAGEMENT ---")
+        print("1. View Book Gallery")
+        print("2. Issue a Book")
+        print("3. Return a Book")
+        print("4. Exit System")
+        
+        choice = input("\n👉 Select an option: ")
+        if choice == '1': library.display_books()
+        elif choice == '2': library.issue_book()
+        elif choice == '3': library.return_book()
+        elif choice == '4': 
+            print("👋 System Closed. Goodbye!")
+            break
+        else: print("⚠️ Invalid selection. Try again.")
+
+if __name__ == "__main__":
+    main()
